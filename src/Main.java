@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -17,8 +18,8 @@ public class Main {
         System.out.println("\n##################Dynamic programming##################\n");
 
         System.out.println("\n-------------Table-------------");
-        var arr1 = knapsackMaxValue(W, items); // result table
-        for (int[] i: arr1) {
+        var arr = knapsackMaxValue(W, items); // result table
+        for (int[] i: arr) {
             for (int j: i) {
                 System.out.print(j + ", ");
             }
@@ -26,36 +27,58 @@ public class Main {
         }
 
         System.out.println("\n-------------Result-------------");
-        var result = getResult(arr1); // Max value that can contain knapsack
-        System.out.println(result);
+        var DPResult = getResult(arr); // Max value that can contain knapsack
+        System.out.println(DPResult);
 
         System.out.println("\n-------------List of involved items (Max value)-------------");
-        var involvedItemsValue = involvedItemsValue(W, items); // List of involved items (Max value)
-        involvedItemsValue.forEach(System.out::println);
+        var DPInvolvedItemsValue = involvedItemsValue(W, items); // List of involved items (Max value)
+        DPInvolvedItemsValue.forEach(System.out::println);
 
         System.out.println("\n-------------List of involved items (Max items)-------------");
-        var involvedItems = involvedItems(W, items); // List of involved items (Max items)
-        involvedItems.forEach(System.out::println);
+        var DPInvolvedItems = involvedItems(W, items); // List of involved items (Max items)
+        DPInvolvedItems.forEach(System.out::println);
 
         System.out.println("\n-------------Max number of items in the knapsack-------------");
-        System.out.println(involvedItems.size());// Max number of items in the knapsack
+        System.out.println(DPInvolvedItems.size());// Max number of items in the knapsack
 
         System.out.println("\n-------------Intersection of the results-------------");
-        involvedItemsValue.stream()
-                .filter(involvedItems::contains)
+        DPInvolvedItemsValue.stream()
+                .filter(DPInvolvedItems::contains)
                 .forEach(System.out::println);// Intersection of the results
-
 
         //--------Greedy algorithm---------//
         System.out.println("\n\n##################Greedy algorithm##################\n");
-        // Max value that can contain knapsack
-        // List of involved items (Max value)
-        // Max number of items in the knapsack
-        // Array of involved items (Max items)
-        // Intersection of the result
+
+        System.out.println("\n-------------List of involved items (Max value)-------------");
+        var sortedItemsByRatio = items.stream()
+                .sorted(Comparator.reverseOrder())
+                .toList();
+        var GAInvolvedItemsValue = GAMaxyList(W, sortedItemsByRatio); // List of involved items (Max value)
+        GAInvolvedItemsValue.forEach(System.out::println);
+
+        System.out.println("\n-------------Result-------------");
+        var GAMaxValue = GAMaxyResult(GAInvolvedItemsValue); // Max value that can contains knapsack
+        System.out.println(GAMaxValue);
+
+        System.out.println("\n-------------List of involved items (Max items)-------------");
+        var sortedItemsByWeight = items.stream()
+                .sorted(Comparator.comparingInt(Item::getWeight))
+                .toList();
+        var GAInvolvedItems = GAMaxyList(W, sortedItemsByWeight); // List of involved items (Max items)
+        GAInvolvedItems.forEach(System.out::println);
+
+        System.out.println("\n-------------Max number of items in the knapsack-------------");
+        var GAMaxItems = GAInvolvedItems.size(); // Max items that can contains knapsack
+        System.out.println(GAMaxItems);
+
+        System.out.println("\n-------------Intersection of the results-------------");
+        GAInvolvedItemsValue.stream()
+                .filter(GAInvolvedItems::contains)
+                .forEach(System.out::println);// Intersection of the result
     }
 
     //--------Dynamic programming---------//
+
     // Return table of result
     static int[][] knapsackMaxValue(int W, List<Item> items) {
         var size = items.size();
@@ -129,6 +152,34 @@ public class Main {
             }
         }
         return result;
+    }
+
+    //--------Greedy algorithm---------//
+
+    // Return list of involved items
+    static List<Item> GAMaxyList(int W, List<Item> sortedItems) {
+        var result = new ArrayList<Item>();
+
+        var size = sortedItems.size();
+        var i = 0;
+        var weight = 0;
+
+        while (i < size && weight <= W) {
+            var curWeight = sortedItems.get(i).getWeight();
+            if (weight + curWeight <= W) {
+                weight += curWeight;
+                result.add(sortedItems.get(i));
+            }
+            i++;
+        }
+        return result;
+    }
+
+    // Return max result
+    static int GAMaxyResult(List<Item> items) {
+        return items.stream()
+                .mapToInt(Item::getValue)
+                .sum();
     }
 
 }

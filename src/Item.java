@@ -23,8 +23,8 @@ public class Item implements Comparable<Item>{
         this.weight = weight;
     }
 
-    public int getRatio() {
-        return value / weight;
+    public double getRatio() {
+        return (double) value / weight;
     }
 
     @Override
@@ -37,6 +37,6 @@ public class Item implements Comparable<Item>{
 
     @Override
     public int compareTo(Item o) {
-        return this.getRatio() - o.getRatio();
+        return (int) (this.getRatio() - o.getRatio());
     }
 }
